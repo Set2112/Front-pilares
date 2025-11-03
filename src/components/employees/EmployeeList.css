@@ -1,0 +1,45 @@
+.employee-list {
+  width: 100%;
+}
+
+.employee-list h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2rem;
+  color: #6E1F34;
+  margin-bottom: 2rem;
+}
+
+.employee-table {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(110, 31, 52, 0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background-color: #6E1F34;
+  color: #FFFFFF;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+td {
+  padding: 1rem;
+  border-bottom: 1px solid #E1CAA8;
+}
+
+.status-active {
+  color: #0F883B;
+  font-weight: 600;
+}
+
+.status-inactive {
+  color: #C44256;
+  font-weight: 600;
+}

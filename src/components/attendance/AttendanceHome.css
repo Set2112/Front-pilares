@@ -1,0 +1,242 @@
+
+.attendance-home {
+  /*width: 100%;*/
+  height:100%;
+  /*min-height: calc(100vh - 140px);*/
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background-color: #6E1F34;
+}
+
+.attendance-container {
+  display: grid;
+  grid-template-columns: 55% 45%;
+  width: 100%;
+  height: 40%;
+  max-width: 100%;
+  background-color: #6E1F34;
+  border-radius: 0;
+  /*min-height: calc(100vh - 140px);*/
+}
+
+.attendance-left {
+  height: 474px;
+  background-color: #E0CCA7;
+  padding: 3rem 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.attendance-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.75rem;
+  font-weight: bold;
+  color: #6E1F34;
+  text-align: center;
+  margin-bottom: 3rem;
+  line-height: 1.2;
+}
+
+.attendance-form {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.attendance-input {
+  font-size: 1.1rem;
+  color: #6E1F34;
+  background-color: #FFFFFF;
+  border: 3px solid #6E1F34;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.attendance-input::placeholder {
+  color: #A8948C;
+  opacity: 0.7;
+}
+
+.attendance-input:focus {
+  outline: none;
+  border-color: #7D323F;
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(125, 50, 63, 0.1);
+}
+
+.attendance-button {
+  background-color: #7D323F;
+  color: #FFFFFF;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 12px;
+  padding: 1.25rem 2.5rem;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+}
+
+.attendance-button:hover {
+  background-color: #6E1F34;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(110, 31, 52, 0.4);
+}
+
+.attendance-settings-icon {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  width: 50px;
+  height: 50px;
+  background-color: #6E1F34;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(110, 31, 52, 0.3);
+}
+
+.attendance-settings-icon:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 6px 12px rgba(110, 31, 52, 0.4);
+}
+
+.attendance-settings-icon svg {
+  width: 26px;
+  height: 26px;
+  fill: #E0CCA7;
+}
+
+.attendance-right {
+  background-color: #6E1F34;
+    height: 474px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  min-width: 0;
+}
+
+/* Título alineado y flotando arriba del QR */
+.qr-title-fixed {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 41px;
+  font-weight: 700;
+
+  color: #E0CCA7;
+  text-align: center;
+  position: absolute;
+  top: 12px;         /* ajusta arriba para evitar el header */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  z-index: 2;
+}
+
+.qr-scanner {
+  width: 100%;
+  max-width: 350px;
+  aspect-ratio: 1;
+  margin-top: 4.5rem; /* Empuja el scanner abajo para no tapar el título */
+}
+
+.scanner-frame {
+  width: 100%;
+  height: 100%;
+  margin-top: 60px;
+  background: linear-gradient(135deg, rgba(80, 180, 86, 0.15) 0%, rgba(15, 136, 59, 0.25) 100%);
+  border: 4px solid #E0CCA7;
+  border-radius: 20px;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.scanner-corner {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #50B456;
+}
+
+.scanner-tl {
+  top: 15px;
+  left: 15px;
+  border-right: none;
+  border-bottom: none;
+  border-top-left-radius: 8px;
+}
+
+.scanner-tr {
+  top: 15px;
+  right: 15px;
+  border-left: none;
+  border-bottom: none;
+  border-top-right-radius: 8px;
+}
+
+.scanner-bl {
+  bottom: 15px;
+  left: 15px;
+  border-right: none;
+  border-top: none;
+  border-bottom-left-radius: 8px;
+}
+
+.scanner-br {
+  bottom: 15px;
+  right: 15px;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 8px;
+}
+
+.scanner-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  background-color: #50B456;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(80, 180, 86, 0.6);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 968px) {
+  .attendance-container {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-left {
+    padding: 2rem;
+  }
+
+  .attendance-title {
+    font-size: 2rem;
+  }
+}
