@@ -2,6 +2,7 @@ import React from 'react';
 import './Footer.css';
 import logo_f from '../../styles/Logo.png';
 import logo_cdmx_f from '../../styles/logo_cdmx.png';
+import logo_gob from '../../styles/Gob.png';
 
 const Footer = () => {
   return (
@@ -19,7 +20,11 @@ const Footer = () => {
             className="logo_f"
           />
         </div>
-        <span className="cdmx-text">GOBIERNO DE LA CIUDAD DE MÉXICO</span>
+        <img
+            src={logo_gob}
+            alt="PILARES"
+            className="logo_gob"
+          />
       </div>
     </footer>
   );
