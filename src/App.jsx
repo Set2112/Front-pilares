@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
@@ -12,15 +12,14 @@ function App() {
     <Router>
       <div className="app">
         <Header />
-
-
-
         <main className="main-content">
           <Routes>
             <Route path="/" element={<AttendanceHome />} />
+            <Route path="/empleados" element={<EmployeeList />} />
+            <Route path="/reportes" element={<ReportsHome />} />
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
-
         <Footer />
       </div>
     </Router>
