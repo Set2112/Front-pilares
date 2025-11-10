@@ -1,227 +1,168 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './EmployeeList.css';
 
-// Componente para la barra de control (Agregar, Buscar, Reporte)
-const ControlPanel = ({ onAddEmployee, onGenerateReport, onSearchChange, searchTerm }) => (
-    <div className="control-panel">
-        <div className="control-panel-left">
-            {/* Botón: Agregar nuevo empleado */}
-            <button className="control-button add-button" onClick={onAddEmployee}>
-                {/* Ícono de Persona con signo de más (usando un SVG placeholder) */}
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-6 1.17-6 3.5V19h12v-2.5c0-2.33-3.67-3.5-6-3.5zm8 0c-.29 0-.62.02-.97.08C16.89 15.68 18 16.71 18 18.25V19h4v-2.5c0-2.33-3.67-3.5-6-3.5zM15 15h2v2h-2zm-3 0h2v2h-2z"/>
-                </svg>
-                Agregar nuevo empleado
-            </button>
-            
-            {/* Botón: Generar Reporte */}
-            <button className="control-button report-button" onClick={onGenerateReport}>
-                {/* Ícono de documento (usando un SVG placeholder) */}
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-2 16H6v-2h6v2zm2-5c0 .55-.45 1-1 1h-6c-.55 0-1-.45-1-1v-6c0-.55.45-1 1-1h6c.55 0 1 .45 1 1v6zm-4-4h2v2h-2v-2z"/>
-                </svg>
-                Generar Reporte
-            </button>
-        </div>
-
-        <div className="control-panel-right">
-            {/* Campo de búsqueda */}
-            <input
-                type="text"
-                className="search-input"
-                placeholder="Buscar por Nombre o ID"
-                value={searchTerm}
-                onChange={(e) => onSearchChange(e.target.value)}
-            />
-            {/* Botón de búsqueda (opcional, ya que se puede buscar al teclear) */}
-            <button className="control-button search-button">Buscar</button>
-        </div>
-    </div>
-);
-
+const INITIAL = [
+  { id: 'ADMIN01', name: 'Admin General', email:'admin@demo.mx', phone:'+52 55 1234 5678', role: 'Administrador', area: 'Dirección', days:'Lun-Vie', from:'08:00:00', to:'17:00:00', active: true, admin: true },
+  { id: 'EMP001', name: 'Ana Martínez',   email:'ana@demo.mx',   phone:'', role: 'Docente',     area: 'Ciber-escuela', days:'', from:'09:00:00', to:'20:00:00', active: true },
+  { id: 'EMP002', name: 'Carlos Gómez',   email:'carlos@demo.mx', phone:'', role: 'Coordinador', area: 'Cultura',        days:'', from:'09:00:00', to:'17:00:00', active: true },
+  { id: 'EMP003', name: 'Lucía Fernández',email:'lucia@demo.mx',  phone:'+52 55 5656 5464', role: 'Auxiliar', area: 'Deporte', days:'Lunes; Jueves', from:'05:00:00', to:'15:00:00', active: false },
+];
 
 const EmployeeList = () => {
-    const navigate = useNavigate();
-    const initialEmployees = [
-        { id: 'EMP001', name: 'Ana Martínez', area: 'Ciber-escuela', role: 'Docente', active: true },
-        { id: 'EMP002', name: 'Carlos Gómez', area: 'Cultura', role: 'Coordinador', active: true },
-        { id: 'EMP003', name: 'Lucía Fernández', area: 'Deporte', role: 'Auxiliar', active: false },
-        { id: 'EMP004', name: 'Miguel Pérez', area: 'Ciber-escuela', role: 'Docente', active: true },
-        // ... puedes agregar más datos aquí
-    ];
-    
-    // Estado para la búsqueda y los empleados filtrados
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [employees, setEmployees] = useState(INITIAL);
+  const [query, setQuery] = useState('');
+  const [deleteId, setDeleteId] = useState(null);
+  const navigate = useNavigate();
 
-    const [newEmployeeData, setNewEmployeeData] = useState({
-        fullName: '',
-        employeeId: '',
-        email: '',
-        phone: '',
-        position: '',
-        area: '',
-        // Aquí irían los estados para las horas
-    });
+  // Cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem('isAdmin');
+    navigate('/');
+  };
 
-    const toggleAddModal = () => {
-        setIsAddModalOpen(!isAddModalOpen);
-    };
-
-    // Funciones de acción
-    const handleAddEmployee = () => {
-        // En lugar de una alerta, abrimos el modal
-        toggleAddModal(); 
-    };
-
-    const handleEmployeeSubmit = (e) => {
-        e.preventDefault();
-        alert(`Empleado ${newEmployeeData.fullName} agregado con éxito.`);
-        // Aquí iría la lógica para enviar los datos a tu API
-        
-        toggleAddModal(); // Cerrar modal después de enviar
-    };
-
-    const handleGenerateReport = () => {
-        navigate('/reports');
-    };
-
-    // ----------------------------------------------------
-    // Lógica de filtrado de empleados
-    const filteredEmployees = initialEmployees.filter(emp => 
-        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        emp.id.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filtro
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return employees;
+    return employees.filter(e =>
+      e.name.toLowerCase().includes(q) ||
+      e.id.toLowerCase().includes(q)
     );
-    // 
+  }, [employees, query]);
 
-    return (
-        <div className="employee-list">
-            <h2>Gestión de Empleados</h2>
-            
-            {/* 👈 INSERTAMOS EL PANEL DE CONTROL AQUÍ */}
-            <ControlPanel
-                onAddEmployee={handleAddEmployee}
-                onGenerateReport={handleGenerateReport}
-                onSearchChange={setSearchTerm}
-                searchTerm={searchTerm}
-            />
-            
-            <div className="employee-table">
-                {/* Si hay resultados, muestra la tabla */}
-                {filteredEmployees.length > 0 ? (
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Área</th>
-                                <th>Rol</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredEmployees.map(emp => (
-                                <tr key={emp.id}>
-                                    <td>{emp.id}</td>
-                                    <td>{emp.name}</td>
-                                    <td>{emp.area}</td>
-                                    <td>{emp.role}</td>
-                                    <td className={emp.active ? 'status-active' : 'status-inactive'}>
-                                        {emp.active ? 'Activo' : 'Inactivo'}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    // Mensaje si no hay resultados
-                    <p className="no-results">No se encontraron empleados que coincidan con "{searchTerm}".</p>
-                )}
-            </div>
-            {/* 👈 ESTRUCTURA DEL MODAL */}
-            {isAddModalOpen && (
-                <div className="modal-overlay" onClick={toggleAddModal}>
-                    <div className="add-employee-modal" onClick={(e) => e.stopPropagation()}>
-                        
-                        <h2 className="modal-title">Agregar nuevo empleado</h2>
-                        
-                        <form onSubmit={handleEmployeeSubmit} className="add-employee-form">
-                            
-                            {/* Fila 1 */}
-                            <label>Nombre completo *</label>
-                            <input type="text" required value={newEmployeeData.fullName} onChange={(e) => setNewEmployeeData({...newEmployeeData, fullName: e.target.value})} />
-                            
-                            {/* Fila 2 */}
-                            <label>ID de empleado *</label>
-                            <input type="text" required value={newEmployeeData.employeeId} onChange={(e) => setNewEmployeeData({...newEmployeeData, employeeId: e.target.value})} />
+  // Handlers
+  const handleSearch = (e) => {
+    e.preventDefault();
+  };
 
-                            {/* Fila 3: Email y Teléfono (en dos columnas) */}
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Email *</label>
-                                    <input type="email" required value={newEmployeeData.email} onChange={(e) => setNewEmployeeData({...newEmployeeData, email: e.target.value})} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Teléfono</label>
-                                    <input type="tel" value={newEmployeeData.phone} onChange={(e) => setNewEmployeeData({...newEmployeeData, phone: e.target.value})} />
-                                    {/* Nota: Para el ícono de país, usarías un componente más complejo. Aquí es solo input. */}
-                                </div>
-                            </div>
-                            
-                            {/* Fila 4: Posición y Área (en dos columnas con select) */}
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Posicion</label>
-                                    <select value={newEmployeeData.position} onChange={(e) => setNewEmployeeData({...newEmployeeData, position: e.target.value})}>
-                                        <option value="">-- Seleccionar --</option>
-                                        <option value="Docente">Docente</option>
-                                        {/* ... otras opciones ... */}
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Area</label>
-                                    <select value={newEmployeeData.area} onChange={(e) => setNewEmployeeData({...newEmployeeData, area: e.target.value})}>
-                                        <option value="">-- Seleccionar --</option>
-                                        <option value="Cultura">Cultura</option>
-                                        {/* ... otras opciones ... */}
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            {/* Fila 5: Horarios (Grid de 7x2) */}
-                            <div className="horario-grid">
-                                <span className="grid-label"></span>
-                                {['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'].map(day => (
-                                    <span key={day} className="grid-day">{day}</span>
-                                ))}
-                                
-                                <span className="grid-label">Hora de entrada</span>
-                                {/* Simula 7 inputs de hora */}
-                                {Array(7).fill(0).map((_, i) => (
-                                    <input key={`in-${i}`} type="time" className="time-input" defaultValue="09:00" />
-                                ))}
-                                
-                                <span className="grid-label">Hora de salida</span>
-                                {/* Simula 7 inputs de hora */}
-                                {Array(7).fill(0).map((_, i) => (
-                                    <input key={`out-${i}`} type="time" className="time-input" defaultValue="18:00" />
-                                ))}
-                            </div>
+  const handleAdd = () => {
+    const num = (employees.length + 1).toString().padStart(3, '0');
+    const newEmp = {
+      id: `EMP${num}`,
+      name: `Nuevo Empleado ${num}`,
+      email: `empleado${num}@demo.mx`,
+      phone: '',
+      role: 'Auxiliar',
+      area: 'Ciber-escuela',
+      days: '',
+      from: '09:00:00',
+      to: '17:00:00',
+      active: true,
+    };
+    setEmployees([newEmp, ...employees]);
+  };
 
-                            {/* Botón de Envío y Cierre */}
-                            <button type="submit" className="submit-button">
-                                Enviar
-                                <span onClick={toggleAddModal}>&times;</span>
-                            </button>
-                            
-                        </form>
-                    </div>
-                </div>
-            )}
+  const handleReport = () => {
+    navigate('/reportes');
+  };
 
+  const handleEdit = (id) => {
+    alert(`Modificar empleado: ${id}`);
+  };
+
+  const handleDelete = (id) => {
+    setDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    setEmployees(prev => prev.filter(e => e.id !== deleteId));
+    setDeleteId(null);
+  };
+
+  const cancelDelete = () => {
+    setDeleteId(null);
+  };
+
+  return (
+    <div className="employee-screen">
+      <div className="emp-toolbar">
+        <button className="btn-circle-exit" onClick={handleLogout} aria-label="Cerrar sesión">×</button>
+        <div className="emp-brand">
+          <div className="emp-logo-text">Gestión de Empleados</div>
         </div>
-    );
+        <h1 className="emp-title">Gestión de Empleados</h1>
+      </div>
+
+      <div className="emp-actions">
+        <button className="btn-primary" onClick={handleAdd}>
+          <span className="btn-icon" role="img" aria-label="Agregar">👤➕</span> Agregar nuevo empleado
+        </button>
+
+        <button className="btn-secondary" onClick={handleReport}>
+          <span className="btn-icon" role="img" aria-label="Reporte">🧾</span> Generar Reporte
+        </button>
+
+        <form className="emp-search" onSubmit={handleSearch}>
+          <input
+            type="text"
+            placeholder="Buscar por Nombre o ID"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <button className="btn-search" type="submit">Buscar</button>
+        </form>
+      </div>
+
+      <div className="employee-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Hora de envío</th>
+              <th>Nombre completo</th>
+              <th>ID de Empleado</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Rol</th>
+              <th>Área</th>
+              <th>Días a Trabajar</th>
+              <th>De</th>
+              <th>A</th>
+              <th className="th-actions">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(emp => (
+              <tr key={emp.id} className={emp.admin ? 'row-admin' : ''}>
+                <td>{new Date().toLocaleDateString('es-MX')}</td>
+                <td>{emp.name}</td>
+                <td>{emp.id}</td>
+                <td>{emp.email}</td>
+                <td>{emp.phone}</td>
+                <td>{emp.role}</td>
+                <td>{emp.area}</td>
+                <td>{emp.days || '—'}</td>
+                <td>{emp.from}</td>
+                <td>{emp.to}</td>
+                <td className="cell-actions">
+                  <button className="btn-mini" onClick={() => handleEdit(emp.id)}>✏️ Modificar</button>
+                  <button className="btn-mini danger" onClick={() => handleDelete(emp.id)}>🗑️ Eliminar</button>
+                </td>
+              </tr>
+            ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={11} className="empty">Sin resultados</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* MODAL DE CONFIRMACIÓN */}
+      {deleteId && (
+        <div className="modal-overlay" style={{zIndex: 2222}}>
+          <div className="admin-modal" style={{minWidth: 340}}>
+            <h2 className="modal-title" style={{fontSize: "1.2rem", marginBottom: 20}}>¿Eliminar este empleado?</h2>
+            <div style={{display: "flex", gap: 12, justifyContent: "center"}}>
+              <button className="btn-primary" onClick={confirmDelete}>Sí, eliminar</button>
+              <button className="btn-secondary" onClick={cancelDelete}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default EmployeeList;

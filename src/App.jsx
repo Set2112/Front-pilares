@@ -26,9 +26,10 @@ function App() {
 
             {/* Opcional: Puedes agregar una ruta de fallback para 404 */}
             <Route path="*" element={<h1>404: Página no encontrada</h1>} />
+            <Route path="/empleados" element={<EmployeeList />} />
+            <Route path="/reportes" element={<ReportsHome />} />
           </Routes>
         </main>
-
         <Footer />
       </div>
     </Router>
