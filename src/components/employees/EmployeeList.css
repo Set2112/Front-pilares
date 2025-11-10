@@ -1,3 +1,96 @@
+/* --- Estilos para el Panel de Control --- */
+
+.control-panel {
+    display: flex;
+    justify-content: space-between; /* Mantiene la separación entre izquierda y derecha */
+    align-items: flex-start; 
+    padding: 20px 0;
+    margin-bottom: 20px;
+    background-color: #E1CAA8;
+}
+
+/* Contenedor de los botones (Agregar y Reporte) */
+.control-panel-left {
+    display: flex;
+    flex-direction: column; /* Apila los botones verticalmente */
+    gap: 10px; /* <--- ESTA ES LA PROPIEDAD QUE CONTROLA LA SEPARACIÓN */
+    margin-left: 100px; /* Cambia 100px por el valor que necesites */
+}
+
+.control-button {
+    background-color: #7D323F; /* Color principal de los botones */
+    color: #FFFFFF;
+    margin: 500;
+    font-weight: 600;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer; 
+    font-size: 1rem;
+    transition: background-color 0.3s, transform 0.2s;
+    letter-spacing: 0.5px;
+    
+    /* Para alinear el ícono con el texto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.control-button:hover {
+    background-color: #6E1F34;
+    transform: translateY(-1px);
+}
+
+.control-button svg {
+    width: 20px;
+    height: 20px;
+    fill: #FFFFFF;
+}
+
+/* Estilos específicos para la búsqueda */
+.control-panel-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 100px;
+}
+
+.search-input {
+    width: 250px;
+    padding: 12px 15px;
+    border: 1px solid #7D323F;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #FFFFFF;
+}
+
+/* Estilo específico para el botón de Búsqueda */
+.control-button.search-button {
+    padding: 12px 25px; /* Ajustar padding para que coincida con el input */
+}
+
+/* Estilo para los botones principales (Agregar y Reporte) para que coincidan con la imagen */
+.add-button, .report-button {
+    /* Darles un ancho fijo para que se vean como bloques grandes */
+    width: 250px; 
+    padding: 15px 20px;
+}
+
+/* Estilos de la tabla (solo por referencia) */
+.employee-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.no-results {
+    text-align: center;
+    padding: 30px;
+    color: #6E1F34;
+    font-size: 1.2rem;
+}
+
 .employee-list {
   width: 100%;
 }
@@ -14,6 +107,7 @@
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(110, 31, 52, 0.1);
+  margin: 20px ;
 }
 
 table {
@@ -42,4 +136,139 @@ td {
 .status-inactive {
   color: #C44256;
   font-weight: 600;
+}
+
+/* --- Estilos del Modal (Igual que el login, pero con nombres diferentes) --- */
+
+.modal-overlay {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    right: 0; 
+    bottom: 0; 
+    background-color: rgba(0, 0, 0, 0.6); 
+    z-index: 1000; 
+    display: flex;
+    justify-content: center;
+    align-items: center;    
+}
+
+.add-employee-modal {
+    background-color: #E0CCA7; /* Fondo del modal: Beige */
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+    width: 95%;
+    max-width: 650px; /* Más ancho para acomodar más campos */
+    position: relative;
+    color: #6E1F34;
+}
+
+.modal-title {
+    color: #7D323F; /* Color vino */
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* --- Estilos del Formulario --- */
+
+.add-employee-form label {
+    display: block;
+    font-weight: 600;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 0.95rem;
+}
+
+.add-employee-form input[type="text"],
+.add-employee-form input[type="email"],
+.add-employee-form input[type="tel"],
+.add-employee-form select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #7D323F;
+    border-radius: 5px;
+    background-color: #F8F4EE; /* Fondo del input: Gris claro */
+    color: #6E1F34;
+    font-size: 1rem;
+}
+
+/* Campos de 2 columnas */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    flex: 1;
+}
+
+/* --- Estilos de la Matriz de Horarios --- */
+
+.horario-grid {
+    display: grid;
+    /* 1 columna para la etiqueta + 7 columnas para los días */
+    grid-template-columns: 1fr repeat(7, minmax(60px, 1fr)); 
+    gap: 10px;
+    margin-top: 25px;
+    text-align: center;
+    align-items: center;
+}
+
+.grid-day {
+    font-weight: 600;
+    color: #7D323F;
+    font-size: 0.85rem;
+}
+
+.grid-label {
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap; /* Evita que el texto de la etiqueta se rompa */
+}
+
+.time-input {
+    padding: 8px 4px;
+    width: 100%;
+    border-radius: 4px;
+    border: 1px solid #7D323F;
+    background-color: #F8F4EE;
+    font-size: 0.85rem;
+}
+
+/* --- Estilo del Botón de Envío --- */
+
+.submit-button {
+    width: 150px; /* Ancho fijo para el botón */
+    background-color: #7D323F;
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-top: 30px;
+    /* Para centrar el botón en el diseño final si se necesita */
+    display: block; 
+    margin-left: auto;
+    margin-right: 0;
+    
+    /* Para el ícono de cierre (X) */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.submit-button span {
+    position: absolute;
+    right: 10px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1; /* Asegura la alineación vertical */
 }

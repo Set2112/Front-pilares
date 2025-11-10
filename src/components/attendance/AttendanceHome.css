@@ -1,8 +1,7 @@
-
 .attendance-home {
-  
   width: 100%;
-  height:100%;
+  min-height: 100vh;
+  height: auto;
   /*min-height: calc(100vh - 140px);*/
   display: flex;
   align-items: stretch;
@@ -15,8 +14,8 @@
   display: grid;
   grid-template-columns: 55% 45%;
   width: 100%;
-  height: 40%;
-  max-width: 100%;
+  height: 100%;
+  /*max-width: 100%;*/
   background-color: #6E1F34;
   border-radius: 0;
   justify-content: flex-start;
@@ -25,7 +24,8 @@
 
 .attendance-left {
   
-  height: 474px;
+  /*height: 474px;*/
+  min-height: 474px;
   background-color: #E0CCA7;
   padding: 3rem 4rem;
   display: flex;
@@ -110,6 +110,104 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 8px rgba(110, 31, 52, 0.3);
+}
+
+/* Estilos generales del Modal */  
+.ventana-settings {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+}
+
+/* Contenedor interno del formulario (Fondo crema) */
+.ventana-settings-texto {
+  background-color: #f9eac8;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Resto de estilos para el contenido del modal (iconos, inputs, botones) */
+.login-icon {
+    width: 70px;
+    height: 70px;
+    color: #8b3c58;
+    margin-bottom: 10px;
+}
+
+.login-title {
+    color: #8b3c58;
+    font-weight: bold;
+    margin-bottom: 25px;
+    font-size: 1.2em;
+}
+
+.ventana-settings-texto form label {
+    display: block;
+    text-align: left;
+    color: #8b3c58;
+    font-weight: 500;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+.ventana-settings-texto form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 1em;
+    margin-bottom: 15px;
+}
+
+.login-button {
+    width: 100%;
+    background-color: #8b3c58;
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 1.5em;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #6a2e45;
+}
+
+.login-button span {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5em;
+    cursor: pointer;
+    font-weight: normal;
+    padding: 5px;
 }
 
 .attendance-settings-icon:hover {
