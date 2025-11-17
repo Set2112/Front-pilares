@@ -4,6 +4,7 @@
   "description": "Sistema de Registro de Asistencia PILARES - CDMX",
   "private": true,
   "dependencies": {
+    "@yudiel/react-qr-scanner": "^2.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.30.1",

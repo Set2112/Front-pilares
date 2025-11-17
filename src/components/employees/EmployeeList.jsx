@@ -3,373 +3,459 @@ import { useNavigate } from 'react-router-dom';
 import './EmployeeList.css';
 
 // Datos iniciales de ejemplo
-const INITIAL = [
-  { id: 'ADMIN01', name: 'Admin General', email:'admin@demo.mx', phone:'+52 55 1234 5678', role: 'Administrador', area: 'Dirección', days:'Lun-Vie', from:'08:00:00', to:'17:00:00', active: true, admin: true },
-  { id: 'EMP001', name: 'Ana Martínez',   email:'ana@demo.mx',   phone:'', role: 'Docente',     area: 'Ciber-escuela', days:'Mar-Jue', from:'09:00:00', to:'20:00:00', active: true, admin: false },
-  { id: 'EMP002', name: 'Carlos Gómez',   email:'carlos@demo.mx', phone:'', role: 'Coordinador', area: 'Cultura',        days:'Lun-Vie', from:'09:00:00', to:'17:00:00', active: true, admin: false },
-  { id: 'EMP003', name: 'Lucía Fernández',email:'lucia@demo.mx',  phone:'+52 55 5656 5464', role: 'Auxiliar', area: 'Deporte', days:'Lunes; Jueves', from:'05:00:00', to:'15:00:00', active: false, admin: false },
+const INITIAL_EMPLOYEES = [
+  {
+    id: 'ADMIN01',
+    name: 'Admin General',
+    email: 'admin@demo.mx',
+    phone: '+52 55 1234 5678',
+    role: 'Administrador',
+    area: 'Dirección',
+    days: 'Lun-Vie',
+    from: '08:00',
+    to: '17:00',
+    active: true,
+    admin: true
+  },
+  {
+    id: 'EMP001',
+    name: 'Ana Martínez',
+    email: 'ana@demo.mx',
+    phone: '',
+    role: 'Docente',
+    area: 'Ciber-escuela',
+    days: 'Mar-Jue',
+    from: '09:00',
+    to: '20:00',
+    active: true,
+    admin: false
+  },
+  {
+    id: 'EMP002',
+    name: 'Carlos Gómez',
+    email: 'carlos@demo.mx',
+    phone: '',
+    role: 'Coordinador',
+    area: 'Cultura',
+    days: 'Lun-Vie',
+    from: '09:00',
+    to: '17:00',
+    active: true,
+    admin: false
+  },
+  {
+    id: 'EMP003',
+    name: 'Lucía Fernández',
+    email: 'lucia@demo.mx',
+    phone: '+52 55 5656 5464',
+    role: 'Auxiliar',
+    area: 'Deporte',
+    days: 'Lunes; Jueves',
+    from: '05:00',
+    to: '15:00',
+    active: false,
+    admin: false
+  },
 ];
 
 const EmployeeList = () => {
-  const [employees, setEmployees] = useState(INITIAL);
-  const [query, setQuery] = useState('');
-  const [deleteId, setDeleteId] = useState(null);
   const navigate = useNavigate();
+  const [employees, setEmployees] = useState(INITIAL_EMPLOYEES);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterActive, setFilterActive] = useState('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalData, setModalData] = useState({
+    isNew: true,
+    employee: null
+  });
 
-  // 👈 ESTADO UNIFICADO DEL MODAL: Contiene los datos del empleado o es null (cerrado)
-  const [modalData, setModalData] = useState(null);
-    
-  // Función para cerrar el modal
-  const toggleModal = () => {
-      setModalData(null);
-  };
-  
-  // Maneja cambios en los campos de texto/select del modal
-  const handleModalDataChange = (field, value) => {
-      setModalData(prev => ({
-          ...prev,
-          [field]: value
-      }));
-  };
-  
-  // Maneja los cambios de horario en el grid
-  const handleScheduleChange = (index, type, value) => {
-      setModalData(prev => {
-          const newSchedule = [...prev.schedule];
-          newSchedule[index][type] = value;
-          return {
-              ...prev,
-              schedule: newSchedule
-          };
-      });
-  };
+  // Filtrado y búsqueda
+  const filteredEmployees = useMemo(() => {
+    return employees.filter(emp => {
+      const matchesSearch = 
+        emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.email.toLowerCase().includes(searchQuery.toLowerCase());
 
-  // Envío de formulario: maneja AGREGAR (isNew: true) y MODIFICAR (isNew: false)
-  const handleModalSubmit = (e) => {
-      e.preventDefault();
-      
-      if (!modalData.name || !modalData.id) {
-           alert('Por favor complete los campos requeridos.');
-           return;
-      }
+      const matchesFilter = 
+        filterActive === 'all' ||
+        (filterActive === 'active' && emp.active) ||
+        (filterActive === 'inactive' && !emp.active);
 
-      // 1. Crear el objeto del empleado a guardar (adaptando los campos del modal)
-      const employeeToSave = {
-          id: modalData.id,
-          name: modalData.name,
-          email: modalData.email,
-          phone: modalData.phone,
-          role: modalData.position || 'N/A', // Mapeo de Posicion a role
-          area: modalData.area || 'N/A',
-          days: 'Ver Horario', 
-          from: modalData.schedule[0].entry + ':00', 
-          to: modalData.schedule[0].exit + ':00', 
-          // Conservar propiedades existentes al modificar
-          active: employees.find(e => e.id === modalData.id)?.active ?? true, 
-          admin: employees.find(e => e.id === modalData.id)?.admin ?? false,
-      };
+      return matchesSearch && matchesFilter;
+    });
+  }, [employees, searchQuery, filterActive]);
 
-      // 2. Actualizar el estado de la lista de empleados
-      if (modalData.isNew) {
-          // AGREGAR NUEVO
-          setEmployees(prev => [employeeToSave, ...prev]);
-      } else {
-          // MODIFICAR EXISTENTE
-          setEmployees(prev => prev.map(emp => 
-              emp.id === modalData.id ? employeeToSave : emp
-          ));
-      }
-      
-      // 3. Cerrar modal
-      setModalData(null); 
-  };
-  
-  // Abre el modal para AGREGAR NUEVO
-  const handleAdd = () => {
-    // Inicializa el estado para un formulario vacío de un nuevo empleado
+  // Abrir modal para agregar
+  const handleAddEmployee = () => {
     setModalData({
+      isNew: true,
+      employee: {
         id: '',
         name: '',
         email: '',
         phone: '',
-        position: '',
+        role: '',
         area: '',
-        schedule: Array(7).fill({ entry: '09:00', exit: '17:00' }),
-        isNew: true // Indicador de que es una operación de agregado
+        schedule: {
+          Lunes: { from: '', to: '' },
+          Martes: { from: '', to: '' },
+          Miercoles: { from: '', to: '' },
+          Jueves: { from: '', to: '' },
+          Viernes: { from: '', to: '' },
+          Sabado: { from: '', to: '' },
+          Domingo: { from: '', to: '' }
+        }
+      }
     });
+    setIsModalOpen(true);
   };
 
-  // Abre el modal para MODIFICAR
-  const handleEdit = (id) => {
-    const employeeToEdit = employees.find(e => e.id === id);
+  // Abrir modal para editar
+  const handleEditEmployee = (employee) => {
+    setModalData({
+      isNew: false,
+      employee: { ...employee }
+    });
+    setIsModalOpen(true);
+  };
 
-    if (employeeToEdit) {
-        // Rellena el formulario con los datos existentes
-        const scheduleData = Array(7).fill({
-            entry: employeeToEdit.from.substring(0, 5) || '09:00',
-            exit: employeeToEdit.to.substring(0, 5) || '17:00'
-        });
-        
-        setModalData({
-            id: employeeToEdit.id,
-            name: employeeToEdit.name,
-            email: employeeToEdit.email,
-            phone: employeeToEdit.phone,
-            position: employeeToEdit.role, // Mapeo: role en data, position en formulario
-            area: employeeToEdit.area,
-            schedule: scheduleData,
-            isNew: false // Indicador de que es una operación de modificación
-        });
+  // Cerrar modal
+  const toggleModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // Guardar empleado (agregar o editar)
+  const handleSaveEmployee = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    const newEmployee = {
+      id: formData.get('id'),
+      name: formData.get('name'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      role: formData.get('role'),
+      area: formData.get('area'),
+      active: true,
+      admin: false,
+      schedule: {
+        Lunes: { 
+          from: formData.get('Lunes-from'), 
+          to: formData.get('Lunes-to') 
+        },
+        Martes: { 
+          from: formData.get('Martes-from'), 
+          to: formData.get('Martes-to') 
+        },
+        Miercoles: { 
+          from: formData.get('Miercoles-from'), 
+          to: formData.get('Miercoles-to') 
+        },
+        Jueves: { 
+          from: formData.get('Jueves-from'), 
+          to: formData.get('Jueves-to') 
+        },
+        Viernes: { 
+          from: formData.get('Viernes-from'), 
+          to: formData.get('Viernes-to') 
+        },
+        Sabado: { 
+          from: formData.get('Sabado-from'), 
+          to: formData.get('Sabado-to') 
+        },
+        Domingo: { 
+          from: formData.get('Domingo-from'), 
+          to: formData.get('Domingo-to') 
+        }
+      }
+    };
+
+    if (modalData.isNew) {
+      setEmployees([...employees, newEmployee]);
     } else {
-         alert('Empleado no encontrado.');
+      setEmployees(employees.map(emp => 
+        emp.id === newEmployee.id ? newEmployee : emp
+      ));
+    }
+
+    setIsModalOpen(false);
+  };
+
+  // Eliminar empleado
+  const handleDeleteEmployee = (id) => {
+    if (window.confirm('¿Está seguro de eliminar este empleado?')) {
+      setEmployees(employees.filter(emp => emp.id !== id));
     }
   };
 
-
-  // ------------------------------------------------------------------
-  //  OTROS HANDLERS Y LÓGICA
-  // ------------------------------------------------------------------
-
-  const handleLogout = () => {
-    localStorage.removeItem('isAdmin');
-    navigate('/');
+  // Toggle estado activo/inactivo
+  const toggleEmployeeStatus = (id) => {
+    setEmployees(employees.map(emp =>
+      emp.id === id ? { ...emp, active: !emp.active } : emp
+    ));
   };
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return employees;
-    return employees.filter(e =>
-      e.name.toLowerCase().includes(q) ||
-      e.id.toLowerCase().includes(q)
-    );
-  }, [employees, query]);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-  };
-
-  const handleReport = () => {
-    navigate('/reportes');
-  };
-
-  const handleDelete = (id) => {
-    setDeleteId(id);
-  };
-
-  const confirmDelete = () => {
-    setEmployees(prev => prev.filter(e => e.id !== deleteId));
-    setDeleteId(null);
-  };
-
-  const cancelDelete = () => {
-    setDeleteId(null);
-  };
-
-  const daysOfWeek = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
-
 
   return (
-    <div className="employee-screen">
-      <div className="emp-toolbar">
-        <button className="btn-circle-exit" onClick={handleLogout} aria-label="Cerrar sesión">×</button>
-        <div className="emp-brand">
-          <div className="emp-logo-text">Gestión de Empleados</div>
+    <div className="employee-list-container">
+      <h1 className="page-title">Gestión de Empleados</h1>
+
+      {/* Panel de controles */}
+      <div className="control-panel">
+        <div className="control-panel-left">
+          <button className="control-button" onClick={handleAddEmployee}>
+            ➕ Agregar Empleado
+          </button>
+          <button className="control-button" onClick={() => navigate('/reports')}>
+            📊 Ver Reportes
+          </button>
         </div>
-        <h1 className="emp-title">Gestión de Empleados</h1>
+
+        <div className="control-panel-right">
+          <button 
+            className="back-button"
+            onClick={() => navigate('/')}
+          >
+            ← Volver
+          </button>
+        </div>
       </div>
 
-      <div className="emp-actions">
-        <button className="btn-primary" onClick={handleAdd}>
-          <span className="btn-icon" role="img" aria-label="Agregar">👤➕</span> Agregar nuevo empleado
-        </button>
-
-        <button className="btn-secondary" onClick={handleReport}>
-          <span className="btn-icon" role="img" aria-label="Reporte">🧾</span> Generar Reporte
-        </button>
-
-        <form className="emp-search" onSubmit={handleSearch}>
-          <input
-            type="text"
-            placeholder="Buscar por Nombre o ID"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <button className="btn-search" type="submit">Buscar</button>
-        </form>
+      {/* Barra de búsqueda y filtros */}
+      <div className="search-filter-bar">
+        <input
+          type="text"
+          placeholder="Buscar por nombre, ID o email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input"
+        />
+        
+        <div className="filter-buttons">
+          <button
+            className={`filter-btn ${filterActive === 'all' ? 'active' : ''}`}
+            onClick={() => setFilterActive('all')}
+          >
+            Todos
+          </button>
+          <button
+            className={`filter-btn ${filterActive === 'active' ? 'active' : ''}`}
+            onClick={() => setFilterActive('active')}
+          >
+            Activos
+          </button>
+          <button
+            className={`filter-btn ${filterActive === 'inactive' ? 'active' : ''}`}
+            onClick={() => setFilterActive('inactive')}
+          >
+            Inactivos
+          </button>
+        </div>
       </div>
 
-      <div className="employee-table">
-        <table>
+      {/* Tabla de empleados */}
+      <div className="table-container">
+        <table className="employee-table">
           <thead>
             <tr>
-              <th>Hora de envío</th>
-              <th>Nombre completo</th>
-              <th>ID de Empleado</th>
+              <th>ID</th>
+              <th>Nombre</th>
               <th>Email</th>
               <th>Teléfono</th>
-              <th>Rol</th>
+              <th>Posición</th>
               <th>Área</th>
-              <th>Días a Trabajar</th>
-              <th>De</th>
-              <th>A</th>
-              <th className="th-actions">Acciones</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map(emp => (
-              <tr key={emp.id} className={emp.admin ? 'row-admin' : ''}>
-                <td>{new Date().toLocaleDateString('es-MX')}</td>
-                <td>{emp.name}</td>
+            {filteredEmployees.map((emp) => (
+              <tr key={emp.id} className={emp.active ? '' : 'inactive-row'}>
                 <td>{emp.id}</td>
+                <td>{emp.name}</td>
                 <td>{emp.email}</td>
-                <td>{emp.phone}</td>
+                <td>{emp.phone || 'N/A'}</td>
                 <td>{emp.role}</td>
                 <td>{emp.area}</td>
-                <td>{emp.days || '—'}</td>
-                <td>{emp.from}</td>
-                <td>{emp.to}</td>
-                <td className="cell-actions">
-                  <button className="btn-mini" onClick={() => handleEdit(emp.id)}>✏️ Modificar</button>
-                  <button className="btn-mini danger" onClick={() => handleDelete(emp.id)}>🗑️ Eliminar</button>
+                <td>
+                  <span className={`status-badge ${emp.active ? 'active' : 'inactive'}`}>
+                    {emp.active ? 'Activo' : 'Inactivo'}
+                  </span>
+                </td>
+                <td>
+                  <div className="action-buttons">
+                    <button
+                      className="btn-edit"
+                      onClick={() => handleEditEmployee(emp)}
+                      title="Editar"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="btn-toggle"
+                      onClick={() => toggleEmployeeStatus(emp.id)}
+                      title={emp.active ? 'Desactivar' : 'Activar'}
+                    >
+                      {emp.active ? '🔒' : '🔓'}
+                    </button>
+                    <button
+                      className="btn-delete"
+                      onClick={() => handleDeleteEmployee(emp.id)}
+                      title="Eliminar"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={11} className="empty">Sin resultados</td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
 
-      {/* MODAL DE CONFIRMACIÓN */}
-      {deleteId && (
-        <div className="modal-overlay" style={{zIndex: 2222}}>
-          <div className="admin-modal" style={{minWidth: 340}}>
-            <h2 className="modal-title" style={{fontSize: "1.2rem", marginBottom: 20}}>¿Eliminar este empleado?</h2>
-            <div style={{display: "flex", gap: 12, justifyContent: "center"}}>
-              <button className="btn-primary" onClick={confirmDelete}>Sí, eliminar</button>
-              <button className="btn-secondary" onClick={cancelDelete}>Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL ÚNICO DE AGREGAR/MODIFICAR */}
-      {modalData && (
-        <div className="modal-overlay" style={{ zIndex: 3333 }} onClick={toggleModal}>
-          <div className="admin-modal add-employee-modal" onClick={(e) => e.stopPropagation()}>
-            
-            {/* TÍTULO DINÁMICO */}
+      {/* Modal para agregar/editar empleado */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={toggleModal}>
+          <div className="add-employee-modal" onClick={(e) => e.stopPropagation()}>
             <h2 className="modal-title">
-                {modalData.isNew ? 'Agregar nuevo empleado' : `Modificar empleado: ${modalData.name}`}
+              {modalData.isNew ? 'Agregar nuevo empleado' : 'Editar empleado'}
             </h2>
-            
-            <form onSubmit={handleModalSubmit} className="add-employee-form">
-                
-                <label>Nombre completo *</label>
-                <input 
-                    type="text" 
-                    required 
-                    value={modalData.name} 
-                    onChange={(e) => handleModalDataChange('name', e.target.value)} 
-                />
-                
-                <label>ID de empleado *</label>
-                <input 
-                    type="text" 
-                    required 
-                    value={modalData.id} 
-                    disabled={!modalData.isNew} 
-                    onChange={(e) => handleModalDataChange('id', e.target.value)} 
-                />
 
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>Email *</label>
-                        <input 
-                            type="email" 
-                            required 
-                            value={modalData.email} 
-                            onChange={(e) => handleModalDataChange('email', e.target.value)} 
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Teléfono</label>
-                        <input 
-                            type="tel" 
-                            value={modalData.phone} 
-                            onChange={(e) => handleModalDataChange('phone', e.target.value)} 
-                        />
-                    </div>
+            <form className="add-employee-form" onSubmit={handleSaveEmployee}>
+              {/* Nombre completo */}
+              <div className="form-group">
+                <label htmlFor="name">Nombre completo *</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  defaultValue={modalData.employee?.name}
+                  required
+                />
+              </div>
+
+              {/* ID de empleado */}
+              <div className="form-group">
+                <label htmlFor="id">ID de empleado *</label>
+                <input
+                  type="text"
+                  id="id"
+                  name="id"
+                  defaultValue={modalData.employee?.id}
+                  required
+                  disabled={!modalData.isNew}
+                />
+              </div>
+
+              {/* Email y Teléfono en fila */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="email">Email *</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    defaultValue={modalData.employee?.email}
+                    required
+                  />
                 </div>
-                
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>Posicion</label>
-                        <select 
-                            value={modalData.position} 
-                            onChange={(e) => handleModalDataChange('position', e.target.value)}
-                        >
-                            <option value="">-- Seleccionar --</option>
-                            <option value="Docente">Docente</option>
-                            <option value="Coordinador">Coordinador</option>
-                            <option value="Auxiliar">Auxiliar</option>
-                            <option value="Administrador">Administrador</option>
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label>Area</label>
-                        <select 
-                            value={modalData.area} 
-                            onChange={(e) => handleModalDataChange('area', e.target.value)}
-                        >
-                            <option value="">-- Seleccionar --</option>
-                            <option value="Ciber-escuela">Ciber-escuela</option>
-                            <option value="Cultura">Cultura</option>
-                            <option value="Deporte">Deporte</option>
-                            <option value="Dirección">Dirección</option>
-                        </select>
-                    </div>
+
+                <div className="form-group">
+                  <label htmlFor="phone">Teléfono</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    defaultValue={modalData.employee?.phone}
+                  />
                 </div>
-                
-                {/* Horarios Grid */}
+              </div>
+
+              {/* Posición y Área en fila */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="role">Posición</label>
+                  <select
+                    id="role"
+                    name="role"
+                    defaultValue={modalData.employee?.role}
+                  >
+                    <option value="">-- Seleccionar --</option>
+                    <option value="Docente">Docente</option>
+                    <option value="Coordinador">Coordinador</option>
+                    <option value="Auxiliar">Auxiliar</option>
+                    <option value="Administrador">Administrador</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="area">Área</label>
+                  <select
+                    id="area"
+                    name="area"
+                    defaultValue={modalData.employee?.area}
+                  >
+                    <option value="">-- Seleccionar --</option>
+                    <option value="Dirección">Dirección</option>
+                    <option value="Ciber-escuela">Ciber-escuela</option>
+                    <option value="Cultura">Cultura</option>
+                    <option value="Deporte">Deporte</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Horarios - Versión optimizada */}
+              <div className="horario-section">
                 <div className="horario-grid">
-                    <span className="grid-label"></span>
-                    {daysOfWeek.map(day => (
-                        <span key={day} className="grid-day">{day}</span>
-                    ))}
-                    
-                    <span className="grid-label">Hora de entrada</span>
-                    {modalData.schedule.map((slot, index) => (
-                        <input 
-                            key={`in-${index}`} 
-                            type="time" 
-                            className="time-input" 
-                            value={slot.entry}
-                            onChange={(e) => handleScheduleChange(index, 'entry', e.target.value)}
-                        />
-                    ))}
-                    
-                    <span className="grid-label">Hora de salida</span>
-                    {modalData.schedule.map((slot, index) => (
-                        <input 
-                            key={`out-${index}`} 
-                            type="time" 
-                            className="time-input" 
-                            value={slot.exit}
-                            onChange={(e) => handleScheduleChange(index, 'exit', e.target.value)}
-                        />
-                    ))}
-                </div>
+                  <div className="grid-label"></div>
+                  <div className="grid-day">Lun</div>
+                  <div className="grid-day">Mar</div>
+                  <div className="grid-day">Mié</div>
+                  <div className="grid-day">Jue</div>
+                  <div className="grid-day">Vie</div>
+                  <div className="grid-day">Sáb</div>
+                  <div className="grid-day">Dom</div>
 
-                {/* Botón de Envío Dinámico */}
-                <button type="submit" className="submit-button">
-                    {modalData.isNew ? 'Enviar' : 'Guardar Cambios'}
-                    <span onClick={toggleModal}>&times;</span>
+                  <div className="grid-label">Entrada</div>
+                  {['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'].map(day => (
+                    <input
+                      key={`${day}-from`}
+                      type="time"
+                      name={`${day}-from`}
+                      className="time-input"
+                      defaultValue={modalData.employee?.schedule?.[day]?.from || ''}
+                    />
+                  ))}
+
+                  <div className="grid-label">Salida</div>
+                  {['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'].map(day => (
+                    <input
+                      key={`${day}-to`}
+                      type="time"
+                      name={`${day}-to`}
+                      className="time-input"
+                      defaultValue={modalData.employee?.schedule?.[day]?.to || ''}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Botones */}
+              <div className="modal-buttons">
+                <button 
+                  type="button" 
+                  className="cancel-button"
+                  onClick={toggleModal}
+                >
+                  Cancelar
                 </button>
-                
+                <button 
+                  type="submit" 
+                  className="submit-button"
+                >
+                  {modalData.isNew ? 'AGREGAR' : 'GUARDAR'}
+                </button>
+              </div>
             </form>
           </div>
         </div>
