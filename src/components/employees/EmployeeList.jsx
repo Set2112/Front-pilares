@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './EmployeeList.css';
+import ConfirmModal from './../common/ConfirmModal';
+import SuccessModal from './../common/SuccessModal';
 
 // Datos iniciales de ejemplo
 const INITIAL_EMPLOYEES = [
@@ -69,6 +71,12 @@ const EmployeeList = () => {
     employee: null
   });
 
+  // Estados para confirmación y éxito
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
   // Filtrado y búsqueda
   const filteredEmployees = useMemo(() => {
     return employees.filter(emp => {
@@ -120,7 +128,7 @@ const EmployeeList = () => {
     setIsModalOpen(true);
   };
 
-  // Cerrar modal
+  // Cerrar modal de agregar/editar
   const toggleModal = () => {
     setIsModalOpen(false);
   };
@@ -173,20 +181,48 @@ const EmployeeList = () => {
 
     if (modalData.isNew) {
       setEmployees([...employees, newEmployee]);
+      showSuccessNotification(`Empleado ${newEmployee.id} agregado correctamente`);
     } else {
       setEmployees(employees.map(emp => 
         emp.id === newEmployee.id ? newEmployee : emp
       ));
+      showSuccessNotification(`Empleado ${newEmployee.id} actualizado correctamente`);
     }
 
     setIsModalOpen(false);
   };
 
-  // Eliminar empleado
+  // Mostrar modal de confirmación para eliminar
   const handleDeleteEmployee = (id) => {
-    if (window.confirm('¿Está seguro de eliminar este empleado?')) {
-      setEmployees(employees.filter(emp => emp.id !== id));
+    setEmployeeToDelete(id);
+    setShowConfirm(true);
+  };
+
+  // Confirmar eliminación
+  const confirmDelete = () => {
+    if (employeeToDelete) {
+      setEmployees(employees.filter(emp => emp.id !== employeeToDelete));
+      showSuccessNotification(`Empleado ${employeeToDelete} eliminado correctamente`);
+      setEmployeeToDelete(null);
     }
+  };
+
+  // Cancelar eliminación
+  const cancelDelete = () => {
+    setShowConfirm(false);
+    setEmployeeToDelete(null);
+  };
+
+  // Mostrar modal de éxito
+  const showSuccessNotification = (message) => {
+    setSuccessMessage(message);
+    setShowSuccess(true);
+  };
+
+  // Cerrar modal de éxito
+  const handleCloseSuccess = () => {
+    setShowSuccess(false);
+    setSuccessMessage('');
   };
 
   // Toggle estado activo/inactivo
@@ -262,7 +298,7 @@ const EmployeeList = () => {
               <th>Nombre</th>
               <th>Email</th>
               <th>Teléfono</th>
-              <th>Posición</th>
+              <th>Rol</th>
               <th>Área</th>
               <th>Estado</th>
               <th>Acciones</th>
@@ -371,36 +407,28 @@ const EmployeeList = () => {
                 </div>
               </div>
 
-              {/* Posición y Área en fila */}
+              {/* Rol y Área en fila - Inputs de texto */}
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="role">Posición</label>
-                  <select
+                  <label htmlFor="role">Rol</label>
+                  <input
+                    type="text"
                     id="role"
                     name="role"
+                    placeholder="Ej: Docente, Coordinador, etc."
                     defaultValue={modalData.employee?.role}
-                  >
-                    <option value="">-- Seleccionar --</option>
-                    <option value="Docente">Docente</option>
-                    <option value="Coordinador">Coordinador</option>
-                    <option value="Auxiliar">Auxiliar</option>
-                    <option value="Administrador">Administrador</option>
-                  </select>
+                  />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="area">Área</label>
-                  <select
+                  <input
+                    type="text"
                     id="area"
                     name="area"
+                    placeholder="Ej: Dirección, Cultura, etc."
                     defaultValue={modalData.employee?.area}
-                  >
-                    <option value="">-- Seleccionar --</option>
-                    <option value="Dirección">Dirección</option>
-                    <option value="Ciber-escuela">Ciber-escuela</option>
-                    <option value="Cultura">Cultura</option>
-                    <option value="Deporte">Deporte</option>
-                  </select>
+                  />
                 </div>
               </div>
 
@@ -460,6 +488,23 @@ const EmployeeList = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmación de eliminación */}
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        message={`¿Estas seguro de eliminar a ${employeeToDelete}?`}
+        employeeId={employeeToDelete}
+      />
+
+      {/* Modal de éxito */}
+      <SuccessModal
+        isOpen={showSuccess}
+        onClose={handleCloseSuccess}
+        message={successMessage}
+        autoCloseDelay={3000}
+      />
     </div>
   );
 };
