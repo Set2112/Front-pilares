@@ -76,6 +76,11 @@ const EmployeeList = () => {
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  
+  // Estado para el switch de administrador
+  const [isAdminInModal, setIsAdminInModal] = useState(false);
+  // Estado para el valor del input de Rol
+  const [roleValue, setRoleValue] = useState('');
 
   // Filtrado y búsqueda
   const filteredEmployees = useMemo(() => {
@@ -93,6 +98,17 @@ const EmployeeList = () => {
       return matchesSearch && matchesFilter;
     });
   }, [employees, searchQuery, filterActive]);
+
+  // Función para manejar el cambio del switch
+  const handleAdminSwitchChange = (e) => {
+    const isChecked = e.target.checked;
+    setIsAdminInModal(isChecked);
+    if (isChecked) {
+      setRoleValue('Administrador');
+    } else {
+      setRoleValue('');
+    }
+  };
 
   // Abrir modal para agregar
   const handleAddEmployee = () => {
@@ -116,6 +132,8 @@ const EmployeeList = () => {
         }
       }
     });
+    setIsAdminInModal(false);
+    setRoleValue('');
     setIsModalOpen(true);
   };
 
@@ -125,6 +143,8 @@ const EmployeeList = () => {
       isNew: false,
       employee: { ...employee }
     });
+    setIsAdminInModal(employee.admin || false);
+    setRoleValue(employee.role || '');
     setIsModalOpen(true);
   };
 
@@ -143,10 +163,10 @@ const EmployeeList = () => {
       name: formData.get('name'),
       email: formData.get('email'),
       phone: formData.get('phone'),
-      role: formData.get('role'),
+      role: isAdminInModal ? 'Administrador' : roleValue,
       area: formData.get('area'),
       active: true,
-      admin: false,
+      admin: isAdminInModal,
       schedule: {
         Lunes: { 
           from: formData.get('Lunes-from'), 
@@ -407,6 +427,21 @@ const EmployeeList = () => {
                 </div>
               </div>
 
+              {/* Switch de Administrador */}
+              <div className="form-group admin-switch-container">
+                <label className="admin-switch-label">
+                  <span>¿Es Administrador?</span>
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={isAdminInModal}
+                      onChange={handleAdminSwitchChange}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </label>
+              </div>
+
               {/* Rol y Área en fila - Inputs de texto */}
               <div className="form-row">
                 <div className="form-group">
@@ -415,8 +450,10 @@ const EmployeeList = () => {
                     type="text"
                     id="role"
                     name="role"
-                    placeholder="Ej: Docente, Coordinador, etc."
-                    defaultValue={modalData.employee?.role}
+                    placeholder={isAdminInModal ? "Administrador (automático)" : "Ej: Docente, Coordinador, etc."}
+                    value={isAdminInModal ? 'Administrador' : roleValue}
+                    onChange={(e) => setRoleValue(e.target.value)}
+                    disabled={isAdminInModal}
                   />
                 </div>
 

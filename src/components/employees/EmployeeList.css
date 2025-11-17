@@ -365,6 +365,90 @@
 }
 
 /* ========================================
+   SWITCH DE ADMINISTRADOR - CON BORDE VISIBLE
+   ======================================== */
+
+.admin-switch-container {
+  margin: 15px 0;
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+  border: none;
+}
+
+.admin-switch-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+  font-weight: 700;
+  color: #6E1F34;
+  font-size: 1rem;
+}
+
+/* Switch Toggle */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+  border: 2px solid #6E1F34;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .slider {
+  background-color: #7D323F;
+  border-color: #6E1F34;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 3px #7D323F, 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Input de Rol deshabilitado */
+.form-group input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ========================================
    MATRIZ DE HORARIOS - OPTIMIZADA
    ======================================== */
 
@@ -574,6 +658,30 @@
   .form-row {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+
+  /* Switch responsive */
+  .admin-switch-label {
+    font-size: 0.9rem;
+  }
+
+  .switch {
+    width: 50px;
+    height: 28px;
+  }
+
+  .slider {
+    border: 2px solid #6E1F34;
+  }
+
+  .slider:before {
+    height: 20px;
+    width: 20px;
+    bottom: 2px;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(20px);
   }
 
   /* Horarios responsive */

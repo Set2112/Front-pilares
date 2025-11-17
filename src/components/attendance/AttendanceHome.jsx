@@ -42,9 +42,12 @@ const AttendanceHome = () => {
     setShowError(true);
   };
 
+  // Modificado: Reabrir modal de admin al cerrar error
   const handleCloseError = () => {
     setShowError(false);
     setErrorMessage('');
+    // Reabrir el modal de administrador
+    setIsModalOpen(true);
   };
 
   // Función para registrar asistencia manual
