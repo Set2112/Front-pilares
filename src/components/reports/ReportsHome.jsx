@@ -4,12 +4,15 @@ import { FaEye, FaDownload } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const ReportsHome = () => {
-  // Estado de filtros / parámetros
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
 
+  // Estado de selección de empleado
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  // Control del modal
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
 
-  // Datos mock de empleados (luego se reemplaza por API)
+  // Datos mock de empleados
   const employees = [
     { id: 1, name: "Melanie Gamero" },
     { id: 2, name: "Ana Martínez" },
@@ -18,6 +21,7 @@ const ReportsHome = () => {
     { id: 5, name: "Sofía Ruiz" },
   ];
 
+  // Filtros
   const [filters, setFilters] = useState({
     search: "",
     fechaEntrada1: "",
@@ -27,7 +31,12 @@ const ReportsHome = () => {
     horasTrabajadas: "",
   });
 
-  // Historial inicial (tal como en tu mock)
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Historial mock
   const [historial, setHistorial] = useState([
     { id: 1, nombre: "ReporteTodosMayo", fecha: "31/12/2023", parametros: {} },
     { id: 2, nombre: "ReporteMelanieJunio", fecha: "31/03/2024", parametros: {} },
@@ -36,15 +45,8 @@ const ReportsHome = () => {
     { id: 5, nombre: "ReporteAnaFebrero", fecha: "15/06/2024", parametros: {} },
   ]);
 
-  // Manejo de cambios en inputs (usa el atributo name en cada input)
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Generar reporte (simulado): valida y agrega al historial
+  // Generar reporte (simulado)
   const handleGenerarReporte = () => {
-    // Validación básica: fechas obligatorias (puedes ajustar)
     if (!filters.fechaEntrada1 || !filters.fechaEntrada2) {
       alert("Selecciona fecha de entrada (ambas) antes de generar el reporte.");
       return;
@@ -54,28 +56,27 @@ const ReportsHome = () => {
       id: historial.length + 1,
       nombre: `Reporte${historial.length + 1}`,
       fecha: new Date().toLocaleDateString(),
-      parametros: { ...filters },
+      parametros: { ...filters, empleado: selectedEmployee },
     };
 
     setHistorial((prev) => [nuevo, ...prev]);
     alert("Reporte generado (simulado). Se agregó al historial.");
   };
 
-  // Ver reporte: muestra parámetros en alerta (simulado)
+  // Ver reporte
   const handleVer = (item) => {
-    const p = item.parametros && Object.keys(item.parametros).length
-      ? item.parametros
-      : filters; // si no hay params guardados, mostramos filtros actuales
-    alert(`Vista previa (simulada) - ${item.nombre}\n\n` + JSON.stringify(p, null, 2));
+    alert(
+      `Vista previa (simulada) - ${item.nombre}\n\n` +
+        JSON.stringify(item.parametros, null, 2)
+    );
   };
 
-  // Descargar reporte (simulado)
+  // Descargar reporte
   const handleDescargar = (item) => {
     alert(`Descargando (simulado): ${item.nombre}`);
-    // Aquí podrías generar un blob/pdf real luego
   };
 
-  // Filtro simple de búsqueda en historial (por nombre)
+  // Filtro simple
   const historialFiltrado = useMemo(() => {
     const q = filters.search?.trim().toLowerCase();
     if (!q) return historial;
@@ -87,29 +88,39 @@ const ReportsHome = () => {
       <h2 className="title-main">Reportes e Historial</h2>
 
       <div className="control-panel-right">
-        <button 
+        <button
           className="back-button"
-          onClick={() => navigate('/employees')}
+          onClick={() => navigate("/employees")}
         >
           ← Volver
         </button>
       </div>
 
-      {/* --- MODAL DE EMPLEADOS --- */}
+      {/* ========== MODAL DE EMPLEADOS ========== */}
       {showEmployeeModal && (
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
               <h3>Empleados</h3>
-              <button className="modal-close" onClick={() => setShowEmployeeModal(false)}>
+              <button
+                className="modal-close"
+                onClick={() => setShowEmployeeModal(false)}
+              >
                 ✖
               </button>
             </div>
 
             <div className="modal-content">
               <div className="employee-grid">
-                {employees.map(emp => (
-                  <button key={emp.id} className="employee-item">
+                {employees.map((emp) => (
+                  <button
+                    key={emp.id}
+                    className="employee-item"
+                    onClick={() => {
+                      setSelectedEmployee(emp);
+                      setShowEmployeeModal(false);
+                    }}
+                  >
                     {emp.name}
                   </button>
                 ))}
@@ -117,13 +128,15 @@ const ReportsHome = () => {
             </div>
 
             <div className="modal-footer">
-              <button className="modal-save">Guardar</button>
+              <button className="modal-save" onClick={() => setShowEmployeeModal(false)}>
+                Guardar
+              </button>
             </div>
           </div>
         </div>
       )}
 
-
+      {/* ======== MAIN GRID ======== */}
       <div className="main-grid">
         {/* PANEL IZQUIERDO */}
         <div className="left-panel">
@@ -131,7 +144,10 @@ const ReportsHome = () => {
 
           {/* BUSCADOR */}
           <div className="search-row">
-            <div className="tag">Todos</div>
+            <div className="tag">
+              {selectedEmployee ? selectedEmployee.name : "Todos"}
+            </div>
+
             <input
               className="search-input"
               placeholder="Buscar por Nombre o ID"
@@ -139,9 +155,11 @@ const ReportsHome = () => {
               value={filters.search}
               onChange={handleChange}
             />
+
             <button
               className="btn-search"
-              onClick={() => setShowEmployeeModal(true)}>
+              onClick={() => setShowEmployeeModal(true)}
+            >
               Buscar
             </button>
           </div>
@@ -205,17 +223,45 @@ const ReportsHome = () => {
           </button>
         </div>
 
-        {/* PANEL DERECHO (vista previa) */}
+        {/* PANEL DERECHO */}
         <div className="right-panel">
           <h3 className="panel-title">Parámetros</h3>
 
           <div style={{ marginTop: 10 }}>
-            <p><strong>Busqueda:</strong> {filters.search || "N/A"}</p>
-            <p><strong>Fecha entrada (1):</strong> {filters.fechaEntrada1 || "N/A"}</p>
-            <p><strong>Hora entrada:</strong> {filters.horaEntrada || "N/A"}</p>
-            <p><strong>Fecha entrada (2):</strong> {filters.fechaEntrada2 || "N/A"}</p>
-            <p><strong>Hora salida:</strong> {filters.horaSalida || "N/A"}</p>
-            <p><strong>Horas trabajadas:</strong> {filters.horasTrabajadas || "N/A"}</p>
+            <p>
+              <strong>Empleado seleccionado:</strong>{" "}
+              {selectedEmployee ? selectedEmployee.name : "Todos"}
+            </p>
+
+            <p>
+              <strong>Busqueda:</strong>{" "}
+              {filters.search || "N/A"}
+            </p>
+
+            <p>
+              <strong>Fecha entrada (1):</strong>{" "}
+              {filters.fechaEntrada1 || "N/A"}
+            </p>
+
+            <p>
+              <strong>Hora entrada:</strong>{" "}
+              {filters.horaEntrada || "N/A"}
+            </p>
+
+            <p>
+              <strong>Fecha entrada (2):</strong>{" "}
+              {filters.fechaEntrada2 || "N/A"}
+            </p>
+
+            <p>
+              <strong>Hora salida:</strong>{" "}
+              {filters.horaSalida || "N/A"}
+            </p>
+
+            <p>
+              <strong>Horas trabajadas:</strong>{" "}
+              {filters.horasTrabajadas || "N/A"}
+            </p>
           </div>
         </div>
       </div>
@@ -237,10 +283,17 @@ const ReportsHome = () => {
               <tr key={h.id}>
                 <td>{h.nombre}</td>
                 <td>{h.fecha}</td>
-                <td onClick={() => handleVer(h)} style={{ cursor: "pointer", textAlign: "center" }}>
+                <td
+                  onClick={() => handleVer(h)}
+                  style={{ cursor: "pointer", textAlign: "center" }}
+                >
                   <FaEye className="icon" />
                 </td>
-                <td onClick={() => handleDescargar(h)} style={{ cursor: "pointer", textAlign: "center" }}>
+
+                <td
+                  onClick={() => handleDescargar(h)}
+                  style={{ cursor: "pointer", textAlign: "center" }}
+                >
                   <FaDownload className="icon" />
                 </td>
               </tr>
